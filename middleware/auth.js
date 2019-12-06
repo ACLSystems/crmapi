@@ -1,10 +1,10 @@
 const StatusCodes = require('http-status-codes');
 //const jwt 				= require('jwt-simple');
-const jsonwebtoken = require('jsonwebtoken');
+const JWT = require('jsonwebtoken');
 const Users 			= require('../src/users');
 const Session			= require('../src/sessions');
 const Time 				= require('../shared/time');
-// const cache 			= require('../src/cache');
+//const cache 			= require('../src/cache');
 //const logger 			= require('../shared/winston-logger');
 const version 		= require('../version/version');
 const Err 				= require('../controllers/err500_controller');
@@ -87,8 +87,8 @@ module.exports = {
 								expiresIn: expiresD,
 								algorithm: 'RS256'
 							};
-							const token = jsonwebtoken.sign(payload, privateKEY, signOptions);
-							const tokenDecoded = jsonwebtoken.decode(token);
+							const token = JWT.sign(payload, privateKEY, signOptions);
+							const tokenDecoded = JWT.decode(token);
 							var session = new Session({
 								user: user._id,
 								token,

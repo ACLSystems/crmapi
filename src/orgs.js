@@ -3,7 +3,6 @@ const mongoose 	= require('mongoose');
 const ModSchema = require('./modified');
 const Address		= require('./address');
 const Social 		= require('./social');
-const Happiness = require('./happiness');
 // const PermissionsSchema = require('./permissions');
 const Schema 		= mongoose.Schema;
 const ObjectId 	= Schema.Types.ObjectId;
@@ -53,21 +52,32 @@ const OrgsSchema = new Schema ({
 		type: ObjectId,
 		ref: 'users'
 	},
-	notes: {
+	notes: [{
 		type: ObjectId,
 		ref: 'notes'
-	},
+	}],
 	phone: [{
 		type: String
 	}],
-	email: [{
+	emails: [{
 		type: String,
 		match: /\S+@\S+\.\S+/
 	}],
 	emailDomain: {
 		type: String
 	},
-	happiness: Happiness,
+	happiness: {
+		type: String,
+		enum: [
+			'unknown',
+			'angry',
+			'fragile',
+			'neutral',
+			'happy',
+			'elated'
+		],
+		default: 'unknown'
+	},
 	tags: [{
 		type: String
 	}]

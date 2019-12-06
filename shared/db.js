@@ -11,17 +11,18 @@ var dbURI = process.env.MONGO_URI || 'mongodb://operator:Password01@mongo:27017/
 let options = {
 	//useMongoClient: true,
 	autoReconnect: true,
-	reconnectTries: 2,
+	reconnectTries: 30,
 	//reconnectTries: 3600, // Intenta conectarte cada segundo hasta en una hora
 	reconnectInterval: 1000,
 	poolSize: 10,
-	useNewUrlParser: true
+	useNewUrlParser: true,
+	useUnifiedTopology: true
 };
 
 // Create the database connection
 mongoose.connect(encodeMongoURI(dbURI), options);
-mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 // Agregado para hacer debug. Apagar inmediatamente y por ningún motivo prenderlo en producción
 if(process.env.NODE_ENV &&

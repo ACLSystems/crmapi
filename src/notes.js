@@ -1,8 +1,17 @@
 const mongoose = require('mongoose');
 const ModSchema = require('./modified');
-const Schema = mongoose.Schema;
+const Schema 		= mongoose.Schema;
+const ObjectId 	= Schema.Types.ObjectId;
 
 const NotesSchema = new Schema ({
+	org:{
+		type: ObjectId,
+		ref: 'orgs'
+	},
+	user: {
+		type: ObjectId,
+		ref: 'users'
+	},
 	text: {
 		type: String,
 	},

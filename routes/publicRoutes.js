@@ -4,7 +4,8 @@ const Validate					= require('../middleware/validatePublic');
 const AuthMiddleware 		= require('../middleware/auth'								);
 // const ChangeParams			= require('../middleware/changeParams'				);
 const GetNothing 				= require('../controllers/get_nothing'				);
-// const UserController		= require('../controllers/user_controller'		);
+const UserController		= require('../controllers/usersController'		);
+const OrgController			= require('../controllers/orgsController'			);
 
 module.exports = (app) => {
 
@@ -29,13 +30,41 @@ module.exports = (app) => {
 		AuthMiddleware.login
 	);
 
-	/** @api {get} /api/user/:name
-		* @apiName Detalles del usuario
+	/** @api {get} /user/:username
+		* @apiName userexists
 		* @apiPermission none
 		* @apiGroup User
-		* @apiParam {String} [name] Nombre de usuario
+		* @apiParam {String} [username] username - en formato de email
+		* @apiSuccess (200) {Object} mixed regresa Token y Expiración
+		*/
+	app.get('/user/:username',
+		Validate.userExists,
+		Validate.results,
+		UserController.checkUserExistence
+	);
+
+	/** @api {get} /org/:org
+		* @apiName orgexists
+		* @apiPermission none
+		* @apiGroup Org
+		* @apiParam {String} [org] nombre de la cuenta
 		* @apiSuccess (200) {Object}
 		*/
+	app.get('/org/:org',
+		Validate.orgExists,
+		Validate.results,
+		OrgController.checkOrgExistence
+	);
+
+
+
+	// /** @api {get} /api/user/:name
+	// 	* @apiName Detalles del usuario
+	// 	* @apiPermission none
+	// 	* @apiGroup User
+	// 	* @apiParam {String} [name] Nombre de usuario
+	// 	* @apiSuccess (200) {Object}
+	// 	*/
 	// app.get ('/api/user/:name',
 	// 	Validate.getDetailsPublic,
 	// 	Validate.results,

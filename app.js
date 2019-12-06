@@ -10,6 +10,7 @@ const publicRoutes				= require('./routes/publicRoutes');
 const orgRoutes 					= require('./routes/orgRoutes');
 const userRoutes 					= require('./routes/userRoutes');
 const adminRoutes 				= require('./routes/adminRoutes');
+const grlRoutes 					= require('./routes/generalRoutes');
 const app 								= express();
 
 app.disable('x-powered-by');
@@ -17,7 +18,7 @@ app.disable('x-powered-by');
 app.use(function(req, res, next) {
 	res.header('Access-Control-Allow-Origin', '*'); // restrict it to the required domain
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,PATCH, DELETE,OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Content-type,Accept,X-Access-Token,X-Key');
+	res.header('Access-Control-Allow-Headers', 'Content-type,Accept,Authorization');
 	if (req.method == 'OPTIONS') {
 		res.status(200).end();
 	} else {
@@ -38,6 +39,8 @@ publicRoutes(app);
 orgRoutes(app);
 userRoutes(app);
 adminRoutes(app);
+grlRoutes(app);
+
 
 // If no route is matched by now, it must be a 404
 //app.use(function(req, res, next) {

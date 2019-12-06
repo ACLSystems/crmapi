@@ -14,6 +14,12 @@ module.exports = {
 		body('username','Se requiere email para ingresar').exists().isEmail(),
 		body('password','Se requiere password').exists(),
 	],
+	orgExists: [
+		param('org','El nombre de la cuenta debe existir').exists()
+	],
+	userExists: [
+		param('username','usuario requerido y debe ser correo electrónico').exists().isEmail()
+	],
 	userRegister:[
 		header('content-type','Encabezado incorrecto - solo application/json')
 			.equals('application/json'),

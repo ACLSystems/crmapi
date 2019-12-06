@@ -1,7 +1,7 @@
 const {
 	body,
 	header,
-	// param,
+	param,
 	// query,
 	validationResult
 } 	= require('express-validator');
@@ -12,6 +12,20 @@ module.exports = {
 		header('content-type','Encabezado incorrecto - solo application/json')
 			.equals('application/json'),
 		body('name','El nombre de la cuenta debe existir').exists()
+	],
+	orgModify: [
+		header('content-type','Encabezado incorrecto - solo application/json')
+			.equals('application/json'),
+		body('_id','El id de la cuenta (_id) es obligatorio').exists()
+	],
+	noteCreate: [
+		header('content-type','Encabezado incorrecto - solo application/json')
+			.equals('application/json'),
+		body('text','Ingresa el texto de la nota').exists(),
+		body('id','Ingresa el id de la cuenta').exists()
+	],
+	getOrg: [
+		param('orgid','Ingresa el id de la cuenta').exists()
 	],
 	results(req,res,next) {
 		//console.log(req.headers);

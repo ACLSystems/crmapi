@@ -1,6 +1,7 @@
 const StatusCodes	= require('http-status-codes');
 const User				= require('../src/users');
-const Org 				= require('../src/orgs');
+// const Org 				= require('../src/orgs');
+const Note 				= require('../src/notes');
 const Err 				= require('../controllers/err500_controller');
 
 
@@ -21,7 +22,7 @@ module.exports = {
 			contactRole: req.body.contactRole,
 			hasAuthority: req.body.hasAuthority,
 			unSubscribe: req.body.unSubscribe,
-			owner: key_user._id,
+			owner: req.body.owner,
 			source: req.body.source,
 			tags: req.body.tags ? req.body.tags : undefined,
 			social: req.body.social,
@@ -52,14 +53,17 @@ module.exports = {
 		});
 		user.person.email = req.body.name;
 		try {
-			if(user.org){
-				var orgs;
-				if(Array.isArray(user.org)){
-					orgs = await Org.find({name: {$in: user.org}});
-				} else {
-					orgs = await Org.find({name: user.org});
-				}
-				user.org = orgs;
+			// if(user.org){
+			// 	var orgs;
+			// 	if(Array.isArray(user.org)){
+			// 		orgs = await Org.find({name: {$in: user.org}});
+			// 	} else {
+			// 		orgs = await Org.find({name: user.org});
+			// 	}
+			// 	user.org = orgs;
+			// }
+			if(!user.password) {
+				delete user.admin.initialPassword;
 			}
 			await user.save();
 			res.status(StatusCodes.OK).json({
@@ -69,6 +73,43 @@ module.exports = {
 			Err.sendError(res,e,'usersController', 'create -- Creating User--');
 		}
 	}, //create
+
+	async get(req,res) {
+		try {
+			const user = await User.findById(req.params.userid)
+				.select('name org char1 char2 flag1 flag2 person type contactRole hasAuthority unSubscribe owner source tags social happiness address mod')
+				.populate('org', 'name')
+				.populate('owner', 'person');
+			if(user) {
+				res.status(StatusCodes.OK).json(user);
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
+					'message': 'No existe el usuario solicitado'
+				});
+			}
+		} catch (e) {
+			Err.sendError(res,e,'usersController', 'get -- Finding User--');
+		}
+	}, //get
+
+	async checkUserExistence(req,res) {
+		const username = req.params.username;
+		try {
+			const user = await User.findOne({name: username}).select('name');
+			if(user) {
+				res.status(StatusCodes.OK).json({
+					'message': `Usuario ${user.name} ya existe`
+				});
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
+					'message': `Usuario ${username} no existe`
+				});
+			}
+		} catch (e) {
+			Err.sendError(res,e,'user_controller','checkUserExistence -- Finding User --');
+		}
+
+	}, //checkUserExistence
 
 	async getRoles(req,res) {
 		const key_user = res.locals.user;
@@ -138,14 +179,10 @@ module.exports = {
 				'message': 'No hay nada que modificar'
 			});
 		}
-		const username = req.body.name;
-		updates = updates.filter(item => item !== 'name');
-		if(!username) {
-			return res.status(StatusCodes.BAD_REQUEST).json({
-				'message': 'No se indicó usuario a modificar'
-			});
-		}
+		updates = updates.filter(item => item !== '_id');
+		updates = updates.filter(item => item !== 'mod');
 		const allowedUpdates = [
+			'name',
 			'person',
 			'org',
 			'orgUnit',
@@ -165,53 +202,101 @@ module.exports = {
 			'happiness',
 			'address'
 		];
+		// console.log(updates);
+		// console.log(allowedUpdates);
 		const isValidOperation = updates.every(update => allowedUpdates.includes(update));
 		if(!isValidOperation) {
 			return res.status(StatusCodes.BAD_REQUEST).json({
-				'message': 'Existen datos inválidos en el JSON proporcionado'
+				'message': 'Existen datos inválidos o no permitidos en el JSON proporcionado'
 			});
 		}
-		if((key_user.roles.isSales && key_user.name !== username) || key_user.name === username) {
-			try {
-				var user = await User.findOne({ name: username });
-				if(!user) {
-					return res.status(StatusCodes.NOT_FOUND).json({
-						'message': `${username} no encontrado`
-					});
-				}
-				for(var i=0; i < updates.length; i++) {
-					if(updates[i] === 'person' || updates[i] === 'address') {
-						const properties = Object.keys(req.body[updates[i]]);
-						properties.forEach(property => {
-							user[updates[i]][property] = req.body[updates[i]][property];
-						});
-					} else if(updates[i] === 'owner') {
-						const owner = await User.findOne({name: req.body[updates[i]]}).select('_id').lean();
-						if(!owner) {
-							return res.status(StatusCodes.BAD_REQUEST).json({
-								'message': 'El owner indicado no existe'
-							});
-						}
-						user[updates[i]] = owner._id; //eslint-disable-line
-					} else {
-						user[updates[i]] = req.body[updates[i]];
-					}
-				}
-				user.mod.push(generateMod(key_user.name,'Modificando usuario'));
-				await user.save();
-				res.status(StatusCodes.OK).json({
-					'message': `${username} modificado`
+		// if((key_user.roles.isSales && key_user.name !== username) || key_user.name === username) {
+		try {
+			var user = await User.findById(req.body._id);
+			if(!user) {
+				return res.status(StatusCodes.NOT_FOUND).json({
+					'message': 'Usuario no encontrado'
 				});
-			} catch (e) {
-				Err.sendError(res,e,'user_controller','modify -- Saving User--');
 			}
-		} else {
-			res.status(StatusCodes.FORBIDDEN).json({
-				'message': 'Operación no permitida'
+			// for(var i=0; i < updates.length; i++) {
+			// 	if(updates[i] === 'person' || updates[i] === 'address') {
+			// 		const properties = Object.keys(req.body[updates[i]]);
+			// 		properties.forEach(property => {
+			// 			user[updates[i]][property] = req.body[updates[i]][property];
+			// 		});
+			// 	} else if(updates[i] === 'owner') {
+			// 		const owner = await User.findOne({name: req.body[updates[i]]}).select('_id').lean();
+			// 		if(!owner) {
+			// 			return res.status(StatusCodes.BAD_REQUEST).json({
+			// 				'message': 'El owner indicado no existe'
+			// 			});
+			// 		}
+			// 		user[updates[i]] = owner._id; //eslint-disable-line
+			// 	} else {
+			// 		user[updates[i]] = req.body[updates[i]];
+			// 	}
+			// }
+			user = Object.assign(user,req.body);
+			user.mod.push(generateMod(key_user.name,'Modificando usuario'));
+			await user.save();
+			res.status(StatusCodes.OK).json({
+				'message': 'Usuario modificado'
 			});
+		} catch (e) {
+			Err.sendError(res,e,'usersController','modify -- Saving User--');
 		}
+	}, // modify
 
-	} // modify
+	async createNote(req,res){
+		const key_user = res.locals.user;
+		const note = new Note({
+			user: req.body.id,
+			text: req.body.text,
+			mod: generateMod(key_user.name,'Creación de nota')
+		});
+		try {
+			await note.save();
+			res.status(StatusCodes.OK).json({
+				'message': 'Nota creada'
+			});
+		} catch (e) {
+			Err.sendError(res,e,'usersController','createNote -- Saving Note --');
+		}
+	}, //createNote
+
+	async owners(req,res) {
+		try {
+			const owners = await User.find({'roles.isSales': true, person: {$exists:true}})
+				.select('name person');
+			if(owners && Array.isArray(owners) && owners.length > 0) {
+				res.status(StatusCodes.OK).json(owners);
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
+					'message': 'No se encontraron dueños'
+				});
+			}
+		} catch (e) {
+			Err.sendError(res,e,'usersController','owners -- Finding owners --');
+		}
+	}, //owners
+
+	async list(req,res) {
+		try {
+			const users = await User.find({person:{$exists:true}})
+				.select('name org person owner type')
+				.populate('org','name')
+				.populate('owner', 'person');
+			if(users && Array.isArray(users) && users.length > 0) {
+				res.status(StatusCodes.OK).json(users);
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
+					'message': 'No hay usuarios'
+				});
+			}
+		} catch (e) {
+			Err.sendError(res,e,'usersController','list -- Finding users --');
+		}
+	}
 };
 
 function generateMod(by, desc) {

@@ -7,7 +7,6 @@ const ModSchema 				= require('./modified'		);
 // const PointSchema 			= require('./point'				);
 const Address						= require('./address'			);
 const Social 						= require('./social');
-const Happiness 				= require('./happiness');
 
 const Schema 						= mongoose.Schema;
 const ObjectId 					= Schema.Types.ObjectId;
@@ -169,7 +168,7 @@ const PrefsSchema = new Schema({
 		type: Boolean,
 		default: true
 	}
-});
+},{ _id: false });
 
 // Definir virtuals
 
@@ -208,6 +207,10 @@ const UserSchema = new Schema ({
 	flag2: {
 		type: String
 	},
+	isActive: {
+		type: Boolean,
+		default: true,
+	},
 	person: PersonSchema,
 	roles: RolesSchema,
 	type: [{
@@ -215,7 +218,7 @@ const UserSchema = new Schema ({
 		enum: ['lead', 'contact', 'internal', 'partner','reseller','other'],
 		default: 'lead'
 	}],
-	contactRole: {
+	contactRole: [{
 		type: String,
 		enum: [
 			'Decision Maker',
@@ -227,7 +230,7 @@ const UserSchema = new Schema ({
 			'Technical',
 			'Other'
 		]
-	},
+	}],
 	hasAuthority: {
 		type: Boolean,
 		default: false
@@ -261,7 +264,18 @@ const UserSchema = new Schema ({
 		type: String
 	}],
 	social: Social,
-	happiness: Happiness,
+	happiness: {
+		type: String,
+		enum: [
+			'unknown',
+			'angry',
+			'fragile',
+			'neutral',
+			'happy',
+			'elated'
+		],
+		default: 'unknown'
+	},
 	address: [Address],
 	mod: [ModSchema],
 	// perm: PermissionsSchema,
@@ -279,12 +293,14 @@ UserSchema.pre('save', function(next) {
 	// 	next();
 	// }
 	//if(this.password && this.admin.passwordSaved !== 'saved') {
-	var re = /^\$2a\$10\$.*/;
-	var found = re.test(this.password);
-	if(!found) {
-		var salt = bcrypt.genSaltSync(10);
-		this.password = bcrypt.hashSync(this.password, salt);
-		this.admin.passwordSaved = 'saved';
+	if(this.password) {
+		var re = /^\$2a\$10\$.*/;
+		var found = re.test(this.password);
+		if(!found) {
+			var salt = bcrypt.genSaltSync(10);
+			this.password = bcrypt.hashSync(this.password, salt);
+			this.admin.passwordSaved = 'saved';
+		}
 	}
 	next();
 });
