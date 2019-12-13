@@ -1,5 +1,7 @@
 const Validate				= require('../middleware/validateAdmin');
+const ValidateCP 			= require('../middleware/validatePostalCode');
 const UsersController	= require('../controllers/usersController');
+const PostalCodeController = require('../controllers/postalCodeController');
 
 module.exports = (app) => {
 
@@ -22,4 +24,14 @@ module.exports = (app) => {
 		Validate.setRoles,
 		Validate.results,
 		UsersController.setRoles);
+
+	/** @api {post} /
+		* @apiName create
+		* @apiPermission admin
+		* @apiGroup postalCode
+		*/
+	app.post ('/api/v1/admin/cp/upsert',
+		ValidateCP.create,
+		ValidateCP.results,
+		PostalCodeController.create);
 };

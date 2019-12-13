@@ -53,8 +53,10 @@ const OrgsSchema = new Schema ({
 		ref: 'users'
 	},
 	notes: [{
-		type: ObjectId,
-		ref: 'notes'
+		text: {
+			type: String,
+		},
+		mod: [ModSchema]
 	}],
 	phone: [{
 		type: String

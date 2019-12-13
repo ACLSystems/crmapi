@@ -20,7 +20,7 @@ const ModSchema = new Schema ({
 	what: {
 		type: String,
 		required: true,
-		default: 'Modified'
+		default: 'Modificado'
 	}
 },{ _id: false });
 

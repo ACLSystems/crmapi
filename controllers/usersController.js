@@ -27,7 +27,7 @@ module.exports = {
 			tags: req.body.tags ? req.body.tags : undefined,
 			social: req.body.social,
 			address: req.body.address,
-			mod: [generateMod(key_user.name,'Creación de usuario')],
+			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación')],
 			admin: {
 				isActive: true,
 				isVerified: false,
@@ -152,6 +152,7 @@ module.exports = {
 					user.roles.isCustomer = roles.isCustomer ? true : false;
 					user.roles.isFinance = roles.isFinance ? true : false;
 					user.roles.isAudit = roles.isAudit ? true : false;
+					user.mod.push(generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Modificación de roles'));
 					await user.save();
 					res.status(StatusCodes.OK).json({
 						'message': `${user.name} modificado`
@@ -237,7 +238,7 @@ module.exports = {
 			// 	}
 			// }
 			user = Object.assign(user,req.body);
-			user.mod.push(generateMod(key_user.name,'Modificando usuario'));
+			user.mod.push(generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Modificando usuario'));
 			await user.save();
 			res.status(StatusCodes.OK).json({
 				'message': 'Usuario modificado'
@@ -252,7 +253,7 @@ module.exports = {
 		const note = new Note({
 			user: req.body.id,
 			text: req.body.text,
-			mod: generateMod(key_user.name,'Creación de nota')
+			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación de nota')]
 		});
 		try {
 			await note.save();
@@ -283,7 +284,7 @@ module.exports = {
 	async list(req,res) {
 		try {
 			const users = await User.find({person:{$exists:true}})
-				.select('name org person owner type')
+				.select('name org person owner type happiness')
 				.populate('org','name')
 				.populate('owner', 'person');
 			if(users && Array.isArray(users) && users.length > 0) {

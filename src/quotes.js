@@ -18,6 +18,12 @@ const QuoteSchema = new Schema ({
 	validDate: {
 		type: Date
 	},
+	business: [
+		{
+			type: ObjectId,
+			ref: 'businesses'
+		}
+	],
 	owner: {
 		type: ObjectId,
 		ref: 'users'
@@ -59,6 +65,9 @@ const QuoteSchema = new Schema ({
 	terms: [{
 		type: String
 	}],
+	version: {
+		type: Number
+	},
 	mod: [ModSchema]
 });
 

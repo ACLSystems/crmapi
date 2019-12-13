@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const ModSchema = require('./modified');
 const Schema = mongoose.Schema;
+const ObjectId 	= Schema.Types.ObjectId;
 
 const CurrenciesSchema = new Schema ({
 	name: {
@@ -13,7 +14,17 @@ const CurrenciesSchema = new Schema ({
 		type: String
 	},
 	price: {
-		type: Number
+		type: Number,
+		min: 0,
+		default: 0
+	},
+	base: {
+		type: ObjectId,
+		ref: 'currencies'
+	},
+	isActive: {
+		type: Boolean,
+		default: true
 	},
 	mod: [ModSchema]
 });

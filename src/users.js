@@ -257,8 +257,10 @@ const UserSchema = new Schema ({
 		]
 	},
 	notes: [{
-		type: ObjectId,
-		ref: 'notes'
+		text: {
+			type: String,
+		},
+		mod: [ModSchema]
 	}],
 	tags: [{
 		type: String

@@ -23,7 +23,7 @@ module.exports = {
 			emails: req.body.emails ? req.body.emails : undefined,
 			emailDomain: req.body.emailDomain || undefined,
 			tags: req.body.tags ? req.body.tags : undefined,
-			mod: [generateMod(key_user.name,'Creación de cuenta')]
+			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación')]
 		});
 		try {
 			await org.save();
@@ -76,7 +76,7 @@ module.exports = {
 				});
 			}
 			org = Object.assign(org,req.body);
-			org.mod.push(generateMod(key_user.name,'Modificando cuenta'));
+			org.mod.push(generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Modificando cuenta'));
 			await org.save();
 			res.status(StatusCodes.OK).json({
 				'message': 'Cuenta modificada'
@@ -110,7 +110,7 @@ module.exports = {
 		const note = new Note({
 			org: req.body.id,
 			text: req.body.text,
-			mod: generateMod(key_user.name,'Creación de nota')
+			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación de nota')]
 		});
 		try {
 			await note.save();
@@ -145,8 +145,13 @@ module.exports = {
 			const org = await Org.findById(req.params.orgid)
 				.select('name longName isActive type address social mod owner phone emails emailDomain happiness tags')
 				.populate('owner', 'person');
+			const notes = await Note.find({org: org._id})
+				.select('text mod').lean();
 			if(org) {
-				res.status(StatusCodes.OK).json(org);
+				if(Array.isArray(notes) && notes.length > 0) {
+					org.notes = [...notes];
+					res.status(StatusCodes.OK).json(org);
+				}
 			} else {
 				res.status(StatusCodes.NOT_FOUND).json({
 					'message': 'No existe la cuenta solicitada'
