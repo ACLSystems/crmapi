@@ -12,6 +12,7 @@ const userRoutes 					= require('./routes/userRoutes');
 const adminRoutes 				= require('./routes/adminRoutes');
 const grlRoutes 					= require('./routes/generalRoutes');
 const opportunityRoutes		= require('./routes/opportunityRoutes');
+const vendorRoutes 				= require('./routes/vendorRoutes');
 const app 								= express();
 
 app.disable('x-powered-by');
@@ -41,6 +42,7 @@ orgRoutes(app);
 userRoutes(app);
 adminRoutes(app);
 grlRoutes(app);
+vendorRoutes(app);
 opportunityRoutes(app);
 
 

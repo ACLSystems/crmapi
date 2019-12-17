@@ -43,7 +43,7 @@ module.exports = (app) => {
 		UserController.owners);
 
 	/** @api {get} /
-		* @apiName users
+		* @apiName list
 		* @apiPermission sales
 		* @apiGroup user
 		*/

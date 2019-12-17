@@ -40,7 +40,9 @@ const ProductSchema = new Schema ({
 			type: String,
 			enum: [
 				'annually',
-				'monthly'
+				'monthly',
+				'threeMonthly',
+				'sixMonthly'
 			]
 		},
 		price: {

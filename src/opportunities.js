@@ -34,6 +34,10 @@ const OpportunitiesSchema = new Schema ({
 		type: ObjectId,
 		ref: 'currencies'
 	},
+	quote: {
+		type: ObjectId,
+		ref: 'quotes'
+	},
 	backCurrency: {
 		type: ObjectId,
 		ref: 'currencies'
@@ -61,6 +65,22 @@ const OpportunitiesSchema = new Schema ({
 		min: 0,
 		max: 100,
 		default: 80
+	},
+	product: {
+		type: ObjectId,
+		ref: 'products'
+	},
+	plan: {
+		type: String
+	},
+	quantity: {
+		type: Number
+	},
+	discount: {
+		type: Number
+	},
+	base: {
+		type: String
 	},
 	date: {
 		type: Date,

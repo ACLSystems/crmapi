@@ -28,38 +28,21 @@ const QuoteSchema = new Schema ({
 		type: ObjectId,
 		ref: 'users'
 	},
-	quote: [
-		{
-			product: {
-				type: ObjectId,
-				ref: 'products'
-			},
-			plan: {
-				type: Number
-			},
-			quantity: {
-				type: Number
-			},
-			discount: {
-				type: Number
-			},
-			base: {
-				type: String,
-				enum: [
-					'annually',
-					'sixMonthly',
-					'threeMonthly',
-					'monthly',
-					'OneTime'
-				]
-			}
-		}
-	],
+	opportunities: [{
+		type: ObjectId,
+		ref: 'opportunities'
+	}],
 	quoteCurrency: {
 		type: ObjectId,
 		ref: 'currencies'
 	},
 	quoteDiscount: {
+		type: Number
+	},
+	taxName: {
+		type: String
+	},
+	tax: {
 		type: Number
 	},
 	terms: [{

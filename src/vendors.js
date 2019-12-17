@@ -6,6 +6,10 @@ const VendorsSchema = new Schema ({
 	name: {
 		type: String,
 	},
+	isActive: {
+		type: Boolean,
+		default: true
+	},
 	mod: [ModSchema]
 });
 
