@@ -39,7 +39,7 @@ module.exports = {
 	modify: [
 		header('content-type','Encabezado incorrecto - solo application/json')
 			.equals('application/json'),
-		body('businessid', 'ID del negocio/oportunidad es obligatorio').exists()
+		body('oppid', 'ID de la oportunidad es obligatorio').exists()
 	],
 	results(req,res,next) {
 		//console.log(req.headers);

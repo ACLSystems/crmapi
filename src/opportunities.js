@@ -4,7 +4,7 @@ const ModSchema = require('./modified');
 const Schema 		= mongoose.Schema;
 const ObjectId 	= Schema.Types.ObjectId;
 
-const BusinessSchema = new Schema ({
+const OpportunitiesSchema = new Schema ({
 	number: {
 		type: Number
 	},
@@ -89,7 +89,7 @@ const BusinessSchema = new Schema ({
 	mod: [ModSchema]
 });
 
-BusinessSchema.pre('save', function(next) {
+OpportunitiesSchema.pre('save', function(next) {
 	if(this.status === 'won' || this.status === 'lost') {
 		if(this.closed === undefined || this.closed === null) {
 			this.closed = true;
@@ -101,9 +101,9 @@ BusinessSchema.pre('save', function(next) {
 	next();
 });
 
-module.exports = BusinessSchema;
+module.exports = OpportunitiesSchema;
 
-BusinessSchema.plugin(auto,{inc_field: 'number'});
+OpportunitiesSchema.plugin(auto,{inc_field: 'number'});
 
-const Business = mongoose.model('businesses', BusinessSchema);
-module.exports = Business;
+const Opportunity = mongoose.model('Opportunities', OpportunitiesSchema);
+module.exports = Opportunity;

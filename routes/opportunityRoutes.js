@@ -1,5 +1,5 @@
-const Validate 						= require('../middleware/validateBusiness');
-const BusinessController	= require('../controllers/businessController');
+const Validate 						= require('../middleware/validateOpportunity');
+const OpportunityController	= require('../controllers/OpportunitiesController');
 
 module.exports = (app) => {
 	/** @api {post} /
@@ -10,17 +10,17 @@ module.exports = (app) => {
 	app.post ('/api/v1/admin/currency',
 		Validate.currencyCreate,
 		Validate.results,
-		BusinessController.createCurrency);
+		OpportunityController.createCurrency);
 
 	/** @api {post} /
 		* @apiName create
 		* @apiPermission admin
 		* @apiGroup businesses
 		*/
-	app.post ('/api/v1/sales/business',
+	app.post ('/api/v1/sales/opportunity',
 		Validate.create,
 		Validate.results,
-		BusinessController.create);
+		OpportunityController.create);
 
 	/** @api {get} /
 		* @apiName listCurrencies
@@ -28,15 +28,15 @@ module.exports = (app) => {
 		* @apiGroup currencies
 		*/
 	app.get ('/api/v1/sales/currencies',
-		BusinessController.listCurrencies);
+		OpportunityController.listCurrencies);
 
 	/** @api {get} /
 		* @apiName list
 		* @apiPermission sales
 		* @apiGroup businesses
 		*/
-	app.get ('/api/v1/sales/businesses',
-		BusinessController.list);
+	app.get ('/api/v1/sales/opportunities',
+		OpportunityController.list);
 
 	/** @api {patch} /
 		* @apiName modifyCurrency
@@ -46,7 +46,7 @@ module.exports = (app) => {
 	app.patch ('/api/v1/admin/currency',
 		Validate.modifyCurrency,
 		Validate.results,
-		BusinessController.modifyCurrency);
+		OpportunityController.modifyCurrency);
 
 	/** @api {patch} /
 		* @apiName updatePrice
@@ -56,15 +56,15 @@ module.exports = (app) => {
 	app.patch ('/api/v1/admin/currency/:base/:currency/:price',
 		Validate.updatePrice,
 		Validate.results,
-		BusinessController.updatePrice);
+		OpportunityController.updatePrice);
 
 	/** @api {patch} /
 		* @apiName modify
 		* @apiPermission sales
 		* @apiGroup businesses
 		*/
-	app.patch ('/api/v1/sales/business',
+	app.patch ('/api/v1/sales/opportunity',
 		Validate.modify,
 		Validate.results,
-		BusinessController.modify);
+		OpportunityController.modify);
 };

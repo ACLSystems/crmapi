@@ -11,7 +11,7 @@ const orgRoutes 					= require('./routes/orgRoutes');
 const userRoutes 					= require('./routes/userRoutes');
 const adminRoutes 				= require('./routes/adminRoutes');
 const grlRoutes 					= require('./routes/generalRoutes');
-const businessRoutes			= require('./routes/businessRoutes');
+const opportunityRoutes		= require('./routes/opportunityRoutes');
 const app 								= express();
 
 app.disable('x-powered-by');
@@ -41,7 +41,7 @@ orgRoutes(app);
 userRoutes(app);
 adminRoutes(app);
 grlRoutes(app);
-businessRoutes(app);
+opportunityRoutes(app);
 
 
 // If no route is matched by now, it must be a 404

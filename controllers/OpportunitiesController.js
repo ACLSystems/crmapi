@@ -1,12 +1,12 @@
 const StatusCodes = require('http-status-codes');
-const Business		= require('../src/business');
+const Opportunity	= require('../src/opportunities');
 const Currency 		= require('../src/currencies');
 const Err					= require('../controllers/err500_controller');
 
 module.exports = {
 	async create(req,res) {
 		const key_user = res.locals.user;
-		var business = new Business({
+		var opportunity = new Opportunity({
 			name: req.body.name,
 			status: req.body.status,
 			value: req.body.value,
@@ -22,13 +22,13 @@ module.exports = {
 			relatedUsers: req.body.relatedUsers
 		});
 		try {
-			await business.save();
+			await opportunity.save();
 			res.status(StatusCodes.OK).json({
-				'message': `${business.name} creado correctamente`,
-				'id': business._id
+				'message': `Oportunidad ${opportunity.name} creada correctamente`,
+				'id': opportunity._id
 			});
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'create -- Creating Business--');
+			Err.sendError(res,e,'OpportunityController', 'create -- Creating opportunity--');
 		}
 	}, //create
 
@@ -45,7 +45,7 @@ module.exports = {
 				});
 			}
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'listCurrencies -- Finding Currencies--');
+			Err.sendError(res,e,'OpportunityController', 'listCurrencies -- Finding Currencies--');
 		}
 	}, //listCurrencies
 
@@ -67,7 +67,7 @@ module.exports = {
 				'id': currency._id
 			});
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'createCurrency -- Saving Currency--');
+			Err.sendError(res,e,'OpportunityController', 'createCurrency -- Saving Currency--');
 		}
 	}, //createCurrency
 
@@ -91,7 +91,7 @@ module.exports = {
 			}
 
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'updateCurrency -- Saving Currencies--');
+			Err.sendError(res,e,'OpportunityController', 'updateCurrency -- Saving Currencies--');
 		}
 	}, //updatePrice
 
@@ -108,7 +108,7 @@ module.exports = {
 				'message': `Moneda ${currency.name} actualizada`
 			});
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'updateCurrency -- Saving Currencies--');
+			Err.sendError(res,e,'OpportunityController', 'updateCurrency -- Saving Currencies--');
 		}
 	}, //modifyCurrency
 
@@ -120,7 +120,7 @@ module.exports = {
 				'message': 'No hay nada que modificar'
 			});
 		}
-		updates = updates.filter(item => item !== 'businessid');
+		updates = updates.filter(item => item !== 'oppid');
 		updates = updates.filter(item => item !== 'mod');
 		updates = updates.filter(item => item !== 'number');
 		const allowedUpdates = [
@@ -146,17 +146,17 @@ module.exports = {
 			});
 		}
 		try {
-			var business = await Business.findById(req.body.businessid);
-			if(business) {
-				business = Object.assign(business,req.body);
-				business.mod.push([generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Modificación')],);
+			var opportunity = await Opportunity.findById(req.body.oppid);
+			if(opportunity) {
+				opportunity = Object.assign(opportunity,req.body);
+				opportunity.mod.push([generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Modificación')],);
 			}
-			await business.save();
+			await opportunity.save();
 			res.status(StatusCodes.OK).json({
-				'message': `Negocio/Oportunidad ${business.name} actualizada`
+				'message': `Oportunidad -${opportunity.name}- actualizada`
 			});
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'updateCurrency -- Saving Currencies--');
+			Err.sendError(res,e,'OpportunityController', 'updateCurrency -- Saving Currencies--');
 		}
 	}, //modify
 
@@ -169,21 +169,21 @@ module.exports = {
 			};
 		}
 		try {
-			const businesses = await Business.find(query)
+			const opportunities = await Opportunity.find(query)
 				.populate('org', 'name')
 				.populate('owner', 'person')
 				.populate('mainCurrency', 'name displayName symbol price')
 				.populate('backCurrency', 'name displayName symbol price')
 				.lean();
-			if(businesses && Array.isArray(businesses) && businesses.length > 0) {
-				res.status(StatusCodes.OK).json(businesses);
+			if(opportunities && Array.isArray(opportunities) && opportunities.length > 0) {
+				res.status(StatusCodes.OK).json(opportunities);
 			}  else {
 				res.status(StatusCodes.NOT_FOUND).json({
-					'message': 'No hay negocios/oportunidades que listar'
+					'message': 'No hay oportunidades que listar'
 				});
 			}
 		} catch (e) {
-			Err.sendError(res,e,'businessController', 'list -- finding businesses--');
+			Err.sendError(res,e,'OpportunityController', 'list -- finding Opportunityes--');
 		}
 
 	}
@@ -191,7 +191,7 @@ module.exports = {
 };
 
 function generateMod(who, desc) {
-	console.log(who);
+	// console.log(who);
 	const date = new Date();
 	return {by: who, when: date, what: desc};
 }
