@@ -5,12 +5,21 @@ const Err 				= require('../controllers/err500_controller');
 module.exports = {
 	async create(req,res) {
 		const key_user = res.locals.user;
-		var vendor = new Vendor({
-			name: req.body.name,
-			isActive: true,
-			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Creación')]
-		});
+		var vendorTemp = Object.assign({},req.body);
+		vendorTemp.mod = [{
+			by: `${key_user.person.name} ${key_user.person.fatherName}`,
+			when: new Date(),
+			what: 'Creación '
+		}];
+		var vendor = new Vendor(vendorTemp);
 		try {
+			const vendorExists = await Vendor.findOne({name: vendorTemp.name});
+			if(vendorExists) {
+				res.status(StatusCodes.CONFLICT).json({
+					'message': `Vendor -${vendorTemp.name}- ya existe`
+				});
+				return;
+			}
 			await vendor.save();
 			res.status(StatusCodes.OK).json({
 				'message': `Fabricante ${vendor.name} creado correctamente`,
@@ -33,6 +42,7 @@ module.exports = {
 		updates = updates.filter(item => item !== 'mod');
 		const allowedUpdates = [
 			'name',
+			'description',
 			'isActive'
 		];
 		const isValidOperation = updates.every(update => allowedUpdates.includes(update));
@@ -45,7 +55,11 @@ module.exports = {
 			var vendor = await Vendor.findById(req.body.vendorid);
 			if(vendor) {
 				vendor = Object.assign(vendor,req.body);
-				vendor.mod.push([generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Modificación')],);
+				vendor.mod.unshift({
+					by: `${key_user.person.name} ${key_user.person.fatherName}`,
+					when: new Date(),
+					what: 'Modificación ' + updates.join()
+				});
 			} else {
 				res.status(StatusCodes.NOT_FOUND).json({
 					'message': `Fabricante ${req.body.vendorid} no se encuentra`
@@ -66,6 +80,9 @@ module.exports = {
 				.select('-__v')
 				.lean();
 			if(vendors && Array.isArray(vendors) && vendors.length > 0) {
+				vendors.forEach(item => {
+					item.mod = item.mod.slice(0,5);
+				});
 				res.status(StatusCodes.OK).json(vendors);
 			} else {
 				res.status(StatusCodes.NOT_FOUND).json({
@@ -77,9 +94,3 @@ module.exports = {
 		}
 	}
 };
-
-function generateMod(who, desc) {
-	// console.log(who);
-	const date = new Date();
-	return {by: who, when: date, what: desc};
-}

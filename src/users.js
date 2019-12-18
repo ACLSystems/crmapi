@@ -256,12 +256,12 @@ const UserSchema = new Schema ({
 			'event'
 		]
 	},
-	notes: [{
-		text: {
-			type: String,
-		},
-		mod: [ModSchema]
-	}],
+	// notes: [{
+	// 	text: {
+	// 		type: String,
+	// 	},
+	// 	mod: [ModSchema]
+	// }],
 	tags: [{
 		type: String
 	}],

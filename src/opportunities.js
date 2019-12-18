@@ -34,15 +34,19 @@ const OpportunitiesSchema = new Schema ({
 		type: ObjectId,
 		ref: 'currencies'
 	},
-	quote: {
-		type: ObjectId,
-		ref: 'quotes'
-	},
+	// quote: {
+	// 	type: ObjectId,
+	// 	ref: 'quotes'
+	// },
 	backCurrency: {
 		type: ObjectId,
 		ref: 'currencies'
 	},
 	value: {
+		type: Number,
+		default: 0
+	},
+	mrr: {
 		type: Number,
 		default: 0
 	},
@@ -68,16 +72,21 @@ const OpportunitiesSchema = new Schema ({
 	},
 	product: {
 		type: ObjectId,
-		ref: 'products'
+		ref: 'products',
+		required: true
 	},
 	plan: {
-		type: String
+		type: String,
+		required: true
 	},
 	quantity: {
-		type: Number
+		type: Number,
+		min: 1,
+		default: 1
 	},
 	discount: {
-		type: Number
+		type: Number,
+		default: 0
 	},
 	base: {
 		type: String
@@ -121,9 +130,14 @@ OpportunitiesSchema.pre('save', function(next) {
 	next();
 });
 
+OpportunitiesSchema.index({ name		: 1 } );
+OpportunitiesSchema.index({ quote 	: 1 } );
+OpportunitiesSchema.index({ status	: 1 } );
+OpportunitiesSchema.index({ closed	: 1 }, { sparse: true } );
+
 module.exports = OpportunitiesSchema;
 
 OpportunitiesSchema.plugin(auto,{inc_field: 'number'});
 
-const Opportunity = mongoose.model('Opportunities', OpportunitiesSchema);
+const Opportunity = mongoose.model('opportunities', OpportunitiesSchema);
 module.exports = Opportunity;

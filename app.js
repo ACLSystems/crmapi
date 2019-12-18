@@ -13,6 +13,8 @@ const adminRoutes 				= require('./routes/adminRoutes');
 const grlRoutes 					= require('./routes/generalRoutes');
 const opportunityRoutes		= require('./routes/opportunityRoutes');
 const vendorRoutes 				= require('./routes/vendorRoutes');
+const productRoutes 			= require('./routes/productRoutes');
+const quoteRoutes					= require('./routes/quoteRoutes');
 const app 								= express();
 
 app.disable('x-powered-by');
@@ -43,8 +45,9 @@ userRoutes(app);
 adminRoutes(app);
 grlRoutes(app);
 vendorRoutes(app);
+productRoutes(app);
 opportunityRoutes(app);
-
+quoteRoutes(app);
 
 // If no route is matched by now, it must be a 404
 //app.use(function(req, res, next) {

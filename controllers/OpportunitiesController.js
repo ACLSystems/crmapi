@@ -6,21 +6,15 @@ const Err					= require('../controllers/err500_controller');
 module.exports = {
 	async create(req,res) {
 		const key_user = res.locals.user;
-		var opportunity = new Opportunity({
-			name: req.body.name,
-			status: req.body.status,
-			value: req.body.value,
-			type: req.body.type,
-			probability: req.body.probability,
-			org: req.body.org,
-			owner: req.body.owner ? req.body.owner: key_user._id,
-			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Creación')],
-			expectedCloseDate: req.body.expectedCloseDate,
-			mainCurrency: req.body.mainCurrency,
-			backCurrency: req.body.backCurrency,
-			date: req.body.date ? req.body.date : new Date(),
-			relatedUsers: req.body.relatedUsers
-		});
+		var oppTemp = Object.assign({},req.body);
+		oppTemp.owner = req.body.owner || key_user._id;
+		oppTemp.date = req.body.date || new Date();
+		oppTemp.mod = [{
+			by: `${key_user.person.name} ${key_user.person.fatherName}`,
+			when: new Date(),
+			what: 'Creación '
+		}];
+		var opportunity = new Opportunity(oppTemp);
 		try {
 			await opportunity.save();
 			res.status(StatusCodes.OK).json({
@@ -51,15 +45,13 @@ module.exports = {
 
 	async createCurrency(req,res) {
 		const key_user = res.locals.user;
-		var currency = new Currency({
-			name: req.body.name,
-			displayName: req.body.displayName,
-			symbol: req.body.symbol,
-			price: req.body.price,
-			isActive: req.body.isActive,
-			base: req.body.base,
-			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Creación')],
-		});
+		var currTemp = Object.assign({},req.body);
+		currTemp.mod = [{
+			by: `${key_user.person.name} ${key_user.person.fatherName}`,
+			when: new Date(),
+			what: 'Creación '
+		}];
+		var currency = new Currency(currTemp);
 		try {
 			await currency.save();
 			res.status(StatusCodes.OK).json({
@@ -79,7 +71,11 @@ module.exports = {
 			if(currency && base) {
 				currency.price = req.params.price;
 				currency.base = base._id;
-				currency.mod.push([generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Actualización de precio')],);
+				currency.mod.unshift({
+					by: `${key_user.person.name} ${key_user.person.fatherName}`,
+					when: new Date(),
+					what: 'Actualización de precio'
+				});
 				await currency.save();
 				res.status(StatusCodes.OK).json({
 					'message': `Moneda ${currency.symbol} actualizada con respecto a ${base.symbol}`
@@ -101,7 +97,11 @@ module.exports = {
 			var currency = await Currency.findById(req.body.currency);
 			if(currency) {
 				currency = Object.assign(currency,req.body);
-				currency.mod.push([generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Modificación')],);
+				currency.mod.unshift({
+					by: `${key_user.person.name} ${key_user.person.fatherName}`,
+					when: new Date(),
+					what: 'Modificación'
+				});
 			}
 			await currency.save();
 			res.status(StatusCodes.OK).json({
@@ -115,6 +115,7 @@ module.exports = {
 	async modify(req,res) {
 		const key_user = res.locals.user;
 		var updates = Object.keys(req.body);
+		const addToArray = req.body.add || false;
 		if(updates.length === 0 ){
 			return res.status(StatusCodes.BAD_REQUEST).json({
 				'message': 'No hay nada que modificar'
@@ -139,7 +140,13 @@ module.exports = {
 			'owner',
 			'org'
 		];
+		const allowedArrayAditions = [
+			'business',
+			'opportunities',
+			'terms'
+		];
 		const isValidOperation = updates.every(update => allowedUpdates.includes(update));
+		const isValidAditionOperation = updates.every(update => allowedArrayAditions.includes(update));
 		if(!isValidOperation) {
 			return res.status(StatusCodes.BAD_REQUEST).json({
 				'message': 'Existen datos inválidos o no permitidos en el JSON proporcionado'
@@ -148,8 +155,26 @@ module.exports = {
 		try {
 			var opportunity = await Opportunity.findById(req.body.oppid);
 			if(opportunity) {
-				opportunity = Object.assign(opportunity,req.body);
-				opportunity.mod.push([generateMod(`${key_user.person.name} ${key_user.person.fatherName}`, 'Modificación')],);
+				if(addToArray && updates.length === 1 && isValidAditionOperation) {
+					const key = updates[0];
+					opportunity[key].push(req.body[key]);
+					opportunity.mod.unshift({
+						by: `${key_user.person.name} ${key_user.person.fatherName}`,
+						when: new Date(),
+						what: 'Adición ' + updates.join()
+					});
+				} else {
+					opportunity.mod.unshift({
+						by: `${key_user.person.name} ${key_user.person.fatherName}`,
+						when: new Date(),
+						what: 'Modificación ' + updates.join()
+					});
+				}
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
+					'message': `Oportunidad ${req.body.oppid} no se encuentra`
+				});
+				return;
 			}
 			await opportunity.save();
 			res.status(StatusCodes.OK).json({
@@ -170,12 +195,17 @@ module.exports = {
 		}
 		try {
 			const opportunities = await Opportunity.find(query)
+				.select('-__v')
 				.populate('org', 'name')
 				.populate('owner', 'person')
 				.populate('mainCurrency', 'name displayName symbol price')
 				.populate('backCurrency', 'name displayName symbol price')
+				.populate('product', 'name plan')
 				.lean();
 			if(opportunities && Array.isArray(opportunities) && opportunities.length > 0) {
+				opportunities.forEach(item => {
+					item.mod = item.mod.slice(0,5);
+				});
 				res.status(StatusCodes.OK).json(opportunities);
 			}  else {
 				res.status(StatusCodes.NOT_FOUND).json({
@@ -189,9 +219,3 @@ module.exports = {
 	}
 
 };
-
-function generateMod(who, desc) {
-	// console.log(who);
-	const date = new Date();
-	return {by: who, when: date, what: desc};
-}

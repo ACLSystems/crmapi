@@ -52,12 +52,12 @@ const OrgsSchema = new Schema ({
 		type: ObjectId,
 		ref: 'users'
 	},
-	notes: [{
-		text: {
-			type: String,
-		},
-		mod: [ModSchema]
-	}],
+	// notes: [{
+	// 	text: {
+	// 		type: String,
+	// 	},
+	// 	mod: [ModSchema]
+	// }],
 	phone: [{
 		type: String
 	}],

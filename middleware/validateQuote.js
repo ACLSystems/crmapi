@@ -2,7 +2,7 @@ const {
 	body,
 	header,
 	// param,
-	// query,
+	query,
 	validationResult
 } 	= require('express-validator');
 const StatusCodes = require('http-status-codes');
@@ -11,12 +11,17 @@ module.exports = {
 	create: [
 		header('content-type','Encabezado incorrecto - solo application/json')
 			.equals('application/json'),
-		body('name', 'Nombre del fabricante es obligatorio').exists()
+		body('customer', 'El usuario cliente es requerido').isMongoId().exists(),
+		body('org', 'La cuenta origen es requerida').isMongoId().exists(),
+		body('customerOrg', 'La cuenta cliente es requerida').isMongoId().exists(),
 	],
 	modify: [
 		header('content-type','Encabezado incorrecto - solo application/json')
 			.equals('application/json'),
-		body('vendorid', 'ID del fabricante es obligatorio').exists()
+		body('quoteid', 'ID de cotización es obligatorio').exists()
+	],
+	list: [
+		query('owner','El dueño debe ser un ObjectId válido').isMongoId().optional()
 	],
 	results(req,res,next) {
 		//console.log(req.headers);

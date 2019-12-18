@@ -7,24 +7,18 @@ module.exports = {
 
 	// crear ORG (crear cuenta)
 	async create(req,res) {
-		// console.log(res.locals);
 		const key_user = res.locals.user;
-		// console.log(req.body);
-		var org = new Org({
-			name: req.body.name,
-			longName: req.body.longName,
-			alias: req.body.alias && (typeof req.body.alias === 'string') ? JSON.parse(req.body.alias) : undefined,
-			isActive: true,
-			type: req.body.type ? req.body.type : 'customer',
-			address: req.body.address ? req.body.address: {},
-			social: req.body.social ? req.body.social: {},
-			owner: key_user._id,
-			phone: req.body.phone ? req.body.phone : undefined,
-			emails: req.body.emails ? req.body.emails : undefined,
-			emailDomain: req.body.emailDomain || undefined,
-			tags: req.body.tags ? req.body.tags : undefined,
-			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación')]
-		});
+		var orgTemp = Object.assign({},req.body);
+		orgTemp.alias = req.body.alias && (typeof req.body.alias === 'string') ? JSON.parse(req.body.alias) : undefined;
+		orgTemp.type = req.body.type || 'customer';
+		orgTemp.address = req.body.address || {};
+		orgTemp.social = req.body.social || {};
+		orgTemp.mod = [{
+			by: `${key_user.person.name} ${key_user.person.fatherName}`,
+			when: new Date(),
+			what: 'Creación '
+		}];
+		var org = new Org(orgTemp);
 		try {
 			await org.save();
 			res.status(StatusCodes.OK).json({
@@ -39,6 +33,7 @@ module.exports = {
 	async modify(req,res) {
 		const key_user = res.locals.user;
 		var updates = Object.keys(req.body);
+		const addToArray = req.body.add || false;
 		if(updates.length === 0 ){
 			return res.status(StatusCodes.BAD_REQUEST).json({
 				'message': 'No hay nada que modificar'
@@ -46,6 +41,7 @@ module.exports = {
 		}
 		updates = updates.filter(item => item !== '_id');
 		updates = updates.filter(item => item !== 'mod');
+		updates = updates.filter(item => item !== 'add');
 		const allowedUpdates = [
 			'name',
 			'longName',
@@ -60,9 +56,14 @@ module.exports = {
 			'happiness',
 			'address'
 		];
-		// console.log(updates);
-		// console.log(allowedUpdates);
+		const allowedArrayAditions = [
+			'address',
+			'social',
+			'phone',
+			'emails'
+		];
 		const isValidOperation = updates.every(update => allowedUpdates.includes(update));
+		const isValidAditionOperation = updates.every(update => allowedArrayAditions.includes(update));
 		if(!isValidOperation) {
 			return res.status(StatusCodes.BAD_REQUEST).json({
 				'message': 'Existen datos inválidos o no permitidos en el JSON proporcionado'
@@ -70,17 +71,33 @@ module.exports = {
 		}
 		try {
 			var org = await Org.findById(req.body._id);
-			if(!org) {
-				return res.status(StatusCodes.NOT_FOUND).json({
+			if(org) {
+				if(addToArray && updates.length === 1 && isValidAditionOperation) {
+					const key = updates[0];
+					org[key].push(req.body[key]);
+					org.mod.unshift({
+						by: `${key_user.person.name} ${key_user.person.fatherName}`,
+						when: new Date(),
+						what: 'Adición ' + updates.join()
+					});
+				} else {
+					org = Object.assign(org,req.body);
+					org.mod.unshift({
+						by: `${key_user.person.name} ${key_user.person.fatherName}`,
+						when: new Date(),
+						what: 'Modificación ' + updates.join()
+					});
+				}
+				await org.save();
+				res.status(StatusCodes.OK).json({
+					'message': 'Cuenta modificada'
+				});
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
 					'message': 'Cuenta no encontrada'
 				});
+				return;
 			}
-			org = Object.assign(org,req.body);
-			org.mod.push(generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Modificando cuenta'));
-			await org.save();
-			res.status(StatusCodes.OK).json({
-				'message': 'Cuenta modificada'
-			});
 		} catch (e) {
 			Err.sendError(res,e,'orgController','modify -- Saving Org--');
 		}
@@ -110,7 +127,11 @@ module.exports = {
 		const note = new Note({
 			org: req.body.id,
 			text: req.body.text,
-			mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación de nota')]
+			mod: [{
+				by: `${key_user.person.name} ${key_user.person.fatherName}`,
+				when: new Date(),
+				what: 'Creación '
+			}]
 		});
 		try {
 			await note.save();
@@ -125,10 +146,13 @@ module.exports = {
 	async list(req,res) {
 		try {
 			const orgs = await Org.find({isActive: true})
-				.select('name longName type owner tags')
+				.select('-__v')
 				.populate('owner','name person')
 				.lean();
 			if(orgs && Array.isArray(orgs) && orgs.length > 0) {
+				orgs.forEach(item => {
+					item.mod = item.mod.slice(0,5);
+				});
 				res.status(StatusCodes.OK).json(orgs);
 			} else {
 				res.status(StatusCodes.NOT_FOUND).json({
@@ -143,7 +167,7 @@ module.exports = {
 	async get(req,res) {
 		try {
 			const org = await Org.findById(req.params.orgid)
-				.select('name longName isActive type address social mod owner phone emails emailDomain happiness tags')
+				.select('-__v')
 				.populate('owner', 'person');
 			const notes = await Note.find({org: org._id})
 				.select('text mod').lean();
@@ -163,8 +187,3 @@ module.exports = {
 	}, //get
 
 };
-
-function generateMod(by, desc) {
-	const date = new Date();
-	return {by: by, when: date, what: desc};
-}

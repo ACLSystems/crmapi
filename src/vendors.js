@@ -10,8 +10,14 @@ const VendorsSchema = new Schema ({
 		type: Boolean,
 		default: true
 	},
+	description: {
+		type: String
+	},
 	mod: [ModSchema]
 });
+
+VendorsSchema.index( { name			: 1	});
+VendorsSchema.index( { isActive	: 1	});
 
 module.exports = VendorsSchema;
 

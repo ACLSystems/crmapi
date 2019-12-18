@@ -14,7 +14,11 @@ module.exports = {
 					let mod = [...findCP.mod];
 					findCP.mod = mod.slice(0,1).concat(mod(2,mod.length));
 				}
-				findCP.mod.push(generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Actualización'));
+				findCP.mod.unshift({
+					by: `${key_user.person.name} ${key_user.person.fatherName}`,
+					when: new Date(),
+					what: 'Actualización '
+				});
 				await findCP.save();
 				res.status(StatusCodes.OK).json({
 					'message': `${findCP.code} - ${findCP.suburb} actualizado correctamente`
@@ -27,7 +31,11 @@ module.exports = {
 					city: req.body.city,
 					state: req.body.state,
 					stateCode: req.body.stateCode,
-					mod: [generateMod(`${key_user.person.name} ${key_user.person.fatherName}`,'Creación')]
+					mod: [{
+						by: `${key_user.person.name} ${key_user.person.fatherName}`,
+						when: new Date(),
+						what: 'Creación '
+					}]
 				});
 				await cp.save();
 				res.status(StatusCodes.OK).json({
@@ -61,8 +69,3 @@ module.exports = {
 		}
 	} //search
 };
-
-function generateMod(by, desc) {
-	const date = new Date();
-	return {by: by, when: date, what: desc};
-}
