@@ -10,6 +10,10 @@ const PriceSchema = new Schema({
 	price: {
 		type: Number,
 		default: 0
+	},
+	discount: {
+		type: Number,
+		default: 0
 	}
 }, {_id: false});
 
@@ -19,10 +23,10 @@ const BaseSchema = new Schema({
 	name: {
 		type: String,
 		enum: [
-			'annually',
-			'monthly',
-			'threeMonthly',
-			'sixMonthly'
+			'Anual',
+			'Mensual',
+			'Trimestral',
+			'Semestral'
 		]
 	},
 	period: {
@@ -64,9 +68,9 @@ const PlanSchema = new Schema({
 	priceBase: {
 		type: String,
 		enum: [
-			'/agent/month',
-			'oneTime',
-			'other'
+			'/agente/mes',
+			'Único pago',
+			'Otro'
 		]
 	},
 	currency: {
@@ -93,9 +97,9 @@ const AddonSchema = new Schema({
 	priceBase: {
 		type: String,
 		enum: [
-			'/agent/month',
-			'oneTime',
-			'other'
+			'/agente/mes',
+			'Único pago',
+			'Otro'
 		]
 	},
 	currency: {
@@ -147,11 +151,11 @@ const ProductSchema = new Schema ({
 	type: {
 		type: String,
 		enum: [
-			'service',
-			'product',
-			'other'
+			'Servicio',
+			'Producto',
+			'Otro'
 		],
-		default: 'service'
+		default: 'Servicio'
 	},
 	mod: [ModSchema]
 });

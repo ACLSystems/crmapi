@@ -180,8 +180,8 @@ module.exports = PrefsSchema;
 const UserSchema = new Schema ({
 	name: {
 		type: String,
-		required: [true, 'User name is required'],
-		unique: [true, 'User name already exists. Please verify'],
+		required: [true, 'Nombre de usuario es requerido'],
+		unique: [true, 'Usuario ya existe'],
 		match: /\S+@\S+\.\S+/
 	},
 	password: {

@@ -43,7 +43,8 @@ const OrgsSchema = new Schema ({
 	type: [{
 		type: String,
 		enum: ['customer', 'internal', 'provider', 'partner', 'support'],
-		default: 'customer'
+		default: 'customer',
+		required: true
 	}],
 	address: [Address],
 	social: [Social],

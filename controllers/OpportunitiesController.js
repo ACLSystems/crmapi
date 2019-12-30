@@ -200,7 +200,15 @@ module.exports = {
 				.populate('owner', 'person')
 				.populate('mainCurrency', 'name displayName symbol price')
 				.populate('backCurrency', 'name displayName symbol price')
-				.populate('product', 'name plan')
+				.populate({
+					path: 'product',
+					select: 'name plan vendor',
+					populate: {
+						path: 'vendor',
+						select: 'name',
+						match: { isActive: true }
+					}
+				})
 				.lean();
 			if(opportunities && Array.isArray(opportunities) && opportunities.length > 0) {
 				opportunities.forEach(item => {

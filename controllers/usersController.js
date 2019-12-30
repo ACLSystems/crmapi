@@ -274,7 +274,7 @@ module.exports = {
 			if(query.name) {
 				query.name = {$regex: query.name, $options: 'i'};
 			}
-			console.log(query);
+			// console.log(query);
 			const users = await User.find(query)
 				.select('name org person owner type happiness mod')
 				.populate('org','name')

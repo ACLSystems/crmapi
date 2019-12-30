@@ -196,6 +196,9 @@ module.exports = {
 					}
 					]
 				})
+				.populate('customer','person')
+				.populate('org', 'name longName type')
+				.populate('customerOrg', 'name longName')
 				.lean();
 			if(quotes && Array.isArray(quotes) && quotes.length > 0) {
 				quotes.forEach(item => {

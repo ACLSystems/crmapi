@@ -114,6 +114,10 @@ module.exports = {
 			var products = await Product.find(query)
 				.select('-__v')
 				.populate('vendor', 'name')
+				.populate({
+					path: 'plan.currency',
+					select: 'name symbol displayName'
+				})
 				.lean();
 			if(products && Array.isArray(products) && products.length > 0) {
 				products.forEach(item => {
