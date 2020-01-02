@@ -23,7 +23,7 @@ module.exports = (app) => {
 		QuoteController.modify);
 
 	/** @api {get} /
-		* @apiName list
+		* @apiName get
 		* @apiPermission sales
 		* @apiGroup quote
 		*/
@@ -31,4 +31,14 @@ module.exports = (app) => {
 		Validate.list,
 		Validate.results,
 		QuoteController.list);
+
+	/** @api {get} /
+		* @apiName list
+		* @apiPermission sales
+		* @apiGroup quote
+		*/
+	app.get ('/api/v1/sales/quote/:quoteid',
+		Validate.get,
+		Validate.results,
+		QuoteController.get);
 };

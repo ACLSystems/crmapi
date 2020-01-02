@@ -213,5 +213,49 @@ module.exports = {
 		} catch (e) {
 			Err.sendError(res,e,'QuoteController', 'list -- finding Quotes--');
 		}
-	} //list
+	}, //list
+
+	async get(req,res) {
+		try {
+			const quote = await Quote.findById(req.params.quoteid)
+				.populate('org', 'name')
+				.populate('customer', 'person')
+				.populate('customerOrg', 'name')
+				.populate('owner', 'person')
+				.populate({
+					path: 'opportunities',
+					select: '-__v',
+					populate: [{
+						path: 'relatedUsers',
+						select: 'person'
+					},{
+						path: 'owner',
+						select: 'person'
+					},{
+						path: 'product',
+						select: '-__v'
+					},{
+						path: 'org',
+						select: 'name'
+					},{
+						path: 'mainCurrency',
+						select: '-__v'
+					},{
+						path: 'backCurrency',
+						select: '-__v'
+					}]
+				})
+				.populate('owner', 'person')
+				.select('-__v');
+			if(quote) {
+				res.status(StatusCodes.OK).json(quote);
+			} else {
+				res.status(StatusCodes.NOT_FOUND).json({
+					'message': 'No existe la cotización solicitada'
+				});
+			}
+		} catch (e) {
+			Err.sendError(res,e,'usersController', 'get -- Finding User--');
+		}
+	}, //get
 };

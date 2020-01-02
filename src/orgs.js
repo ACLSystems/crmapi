@@ -1,9 +1,9 @@
 // Definir requerimientos
-const mongoose 	= require('mongoose');
-const ModSchema = require('./modified');
-const Address		= require('./address');
-const Social 		= require('./social');
-// const PermissionsSchema = require('./permissions');
+const mongoose 	= require('mongoose'		);
+const ModSchema = require('./modified'	);
+const Address		= require('./address'		);
+const Social 		= require('./social'		);
+const Happy 		= require('./happiness'	);
 const Schema 		= mongoose.Schema;
 const ObjectId 	= Schema.Types.ObjectId;
 
@@ -41,9 +41,9 @@ const OrgsSchema = new Schema ({
 		default: true
 	},
 	type: [{
-		type: String,
-		enum: ['customer', 'internal', 'provider', 'partner', 'support'],
-		default: 'customer',
+		type: Number,
+		// enum: ['customer', 'internal', 'provider', 'partner', 'support'],
+		default: 0,
 		required: true
 	}],
 	address: [Address],
@@ -69,18 +69,7 @@ const OrgsSchema = new Schema ({
 	emailDomain: {
 		type: String
 	},
-	happiness: {
-		type: String,
-		enum: [
-			'unknown',
-			'angry',
-			'fragile',
-			'neutral',
-			'happy',
-			'elated'
-		],
-		default: 'unknown'
-	},
+	happiness: Happy,
 	tags: [{
 		type: String
 	}]
@@ -94,6 +83,11 @@ const OrgsSchema = new Schema ({
 OrgsSchema.pre('save', function(next) {
 	this.name = this.name.toLowerCase();
 	next();
+});
+
+OrgsSchema.static('enumType' , function(language, field){
+	const Enum = require('../src/enums');
+	return Enum.find({language, field,schemaName: 'orgs'}).sort({value: 1});
 });
 
 // Definir índices

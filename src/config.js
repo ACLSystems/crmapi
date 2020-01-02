@@ -70,9 +70,9 @@ const ConfigSchema = new Schema({
 				id: {type: String}
 			},
 			paymentMethod: {
-				type: String,
-				enum: ['cash','debit-card','credit-card','service-card','transfer','check','electronic-wallet','electronic-money','grocery-voucher','other'],
-				default: 'other'
+				type: Number,
+				// enum: ['cash','debit-card','credit-card','service-card','transfer','check','electronic-wallet','electronic-money','grocery-voucher','other'],
+				default: 9
 			},
 			cfdiUse: {
 				type: String
@@ -83,9 +83,9 @@ const ConfigSchema = new Schema({
 				}
 			},
 			paymentType: {
-				type: String,
-				enum: ['PUE','PPD'],
-				default: 'PPD'
+				type: Number,
+				// enum: ['PUE','PPD'],
+				default: 1
 			},
 			tax: [{
 				id: { type: Number}
@@ -154,6 +154,11 @@ const ConfigSchema = new Schema({
 });
 
 // Definir middleware
+
+ConfigSchema.static('enumType' , function(language, field){
+	const Enum = require('../src/enums');
+	return Enum.find({language, field,schemaName: 'config'}).sort({value: 1});
+});
 
 // Definir índices
 

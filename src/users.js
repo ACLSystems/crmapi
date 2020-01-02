@@ -3,10 +3,9 @@ const mongoose 					= require('mongoose'			);
 const moment 						= require('moment'				);
 const bcrypt 						= require('bcryptjs'			);
 const ModSchema 				= require('./modified'		);
-// const PermissionsSchema = require('./permissions'	);
-// const PointSchema 			= require('./point'				);
+const Happy 						= require('./happiness'		);
 const Address						= require('./address'			);
-const Social 						= require('./social');
+const Social 						= require('./social'			);
 
 const Schema 						= mongoose.Schema;
 const ObjectId 					= Schema.Types.ObjectId;
@@ -167,6 +166,9 @@ const PrefsSchema = new Schema({
 	alwaysSendEmail: {
 		type: Boolean,
 		default: true
+	},
+	language: {
+		type: String
 	}
 },{ _id: false });
 
@@ -214,22 +216,22 @@ const UserSchema = new Schema ({
 	person: PersonSchema,
 	roles: RolesSchema,
 	type: [{
-		type: String,
-		enum: ['lead', 'contact', 'internal', 'partner','reseller','other'],
-		default: 'lead'
+		type: Number,
+		// enum: ['lead', 'contact', 'internal', 'partner','reseller','other'],
+		default: 0
 	}],
 	contactRole: [{
-		type: String,
-		enum: [
-			'Decision Maker',
-			'Executive Sponsor',
-			'Admin/Project Manager',
-			'Finance',
-			'Legal',
-			'Purchase',
-			'Technical',
-			'Other'
-		]
+		type: Number,
+		// enum: [
+		// 	'Decision Maker',
+		// 	'Executive Sponsor',
+		// 	'Admin/Project Manager',
+		// 	'Finance',
+		// 	'Legal',
+		// 	'Purchase',
+		// 	'Technical',
+		// 	'Other'
+		// ]
 	}],
 	hasAuthority: {
 		type: Boolean,
@@ -244,17 +246,17 @@ const UserSchema = new Schema ({
 		ref: 'users'
 	},
 	source: {
-		type: String,
-		enum: [
-			'web',
-			'phone',
-			'email',
-			'fresh',
-			'direct',
-			'referal',
-			'social',
-			'event'
-		]
+		type: Number,
+		// enum: [
+		// 	'web',
+		// 	'phone',
+		// 	'email',
+		// 	'fresh',
+		// 	'direct',
+		// 	'referal',
+		// 	'social',
+		// 	'event'
+		// ]
 	},
 	// notes: [{
 	// 	text: {
@@ -266,18 +268,7 @@ const UserSchema = new Schema ({
 		type: String
 	}],
 	social: Social,
-	happiness: {
-		type: String,
-		enum: [
-			'unknown',
-			'angry',
-			'fragile',
-			'neutral',
-			'happy',
-			'elated'
-		],
-		default: 'unknown'
-	},
+	happiness: Happy,
 	address: [Address],
 	mod: [ModSchema],
 	// perm: PermissionsSchema,
@@ -319,6 +310,17 @@ UserSchema.methods.validatePassword = function(password, cb) {
 	bcrypt.compare(password, this.password, function(err, isOk) {
 		if(err) return cb(err);
 		cb(null, isOk);
+	});
+};
+
+UserSchema.static('enumType' , function(language, field){
+	const Enum = require('../src/enums');
+	return Enum.find({language, field,schemaName: 'users'}).sort({value: 1});
+});
+
+UserSchema.methods.log = function(by,what){
+	this.mod.shift({
+		by, what, when: new Date()
 	});
 };
 

@@ -21,13 +21,13 @@ module.exports = PriceSchema;
 
 const BaseSchema = new Schema({
 	name: {
-		type: String,
-		enum: [
-			'Anual',
-			'Mensual',
-			'Trimestral',
-			'Semestral'
-		]
+		type: 0,
+		// enum: [
+		// 	'Anual',
+		// 	'Mensual',
+		// 	'Trimestral',
+		// 	'Semestral'
+		// ]
 	},
 	period: {
 		type: Number,
@@ -66,12 +66,12 @@ const PlanSchema = new Schema({
 	base: [BaseSchema],
 	price: [PriceSchema],
 	priceBase: {
-		type: String,
-		enum: [
-			'/agente/mes',
-			'Único pago',
-			'Otro'
-		]
+		type: Number
+		// enum: [
+		// 	'/agente/mes',
+		// 	'Único pago',
+		// 	'Otro'
+		// ]
 	},
 	currency: {
 		type: ObjectId,
@@ -95,12 +95,12 @@ const AddonSchema = new Schema({
 		type: Number
 	},
 	priceBase: {
-		type: String,
-		enum: [
-			'/agente/mes',
-			'Único pago',
-			'Otro'
-		]
+		type: Number,
+		// enum: [
+		// 	'/agente/mes',
+		// 	'Único pago',
+		// 	'Otro'
+		// ]
 	},
 	currency: {
 		type: ObjectId,
@@ -149,15 +149,20 @@ const ProductSchema = new Schema ({
 		type: String
 	}],
 	type: {
-		type: String,
-		enum: [
-			'Servicio',
-			'Producto',
-			'Otro'
-		],
-		default: 'Servicio'
+		type: Number,
+		// enum: [
+		// 	'Servicio',
+		// 	'Producto',
+		// 	'Otro'
+		// ],
+		default: 0
 	},
 	mod: [ModSchema]
+});
+
+ProductSchema.static('enumType' , function(language, field){
+	const Enum = require('../src/enums');
+	return Enum.find({language, field,schemaName: 'products'}).sort({value: 1});
 });
 
 ProductSchema.index({ name			: 1	});

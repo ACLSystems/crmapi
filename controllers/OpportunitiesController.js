@@ -224,6 +224,17 @@ module.exports = {
 			Err.sendError(res,e,'OpportunityController', 'list -- finding Opportunityes--');
 		}
 
-	}
+	}, //list
+
+	async enumField(req,res) {
+		const language = req.params.language;
+		const field = req.params.field;
+		try {
+			const enums = await Opportunity.enumType(language,field);
+			res.status(StatusCodes.OK).json(enums.map(e => e.text));
+		} catch (e) {
+			Err.sendError(res,e,'OpportunityController', 'enumField -- finding Enums--');
+		}
+	} // enumField
 
 };

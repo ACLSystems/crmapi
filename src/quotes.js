@@ -71,16 +71,21 @@ const QuoteSchema = new Schema ({
 		type: Number
 	},
 	status: {
-		type: String,
-		enum: [
-			'new',
-			'review',
-			'won',
-			'lost'
-		],
-		default: 'new'
+		type: Number,
+		// enum: [
+		// 	'new',
+		// 	'review',
+		// 	'won',
+		// 	'lost'
+		// ],
+		default: 0
 	},
 	mod: [ModSchema]
+});
+
+QuoteSchema.static('enumType' , function(language, field){
+	const Enum = require('../src/enums');
+	return Enum.find({language, field,schemaName: 'quotes'}).sort({value: 1});
 });
 
 

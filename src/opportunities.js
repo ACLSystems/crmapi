@@ -13,18 +13,18 @@ const OpportunitiesSchema = new Schema ({
 		required: [true, 'Hace falta el nombre']
 	},
 	status: {
-		type: String,
-		enum: [
-			'new',
-			'demo',
-			'evaluation',
-			'negotiation',
-			'commitment',
-			'hold',
-			'won',
-			'lost'
-		],
-		default: 'new'
+		type: Number,
+		// enum: [
+		// 	'Nueva',
+		// 	'Demo',
+		// 	'Evaluación',
+		// 	'Negociación',
+		// 	'Compromiso',
+		// 	'En pausa',
+		// 	'Ganada',
+		// 	'Perdida'
+		// ],
+		default: 0
 	},
 	closed: {
 		type: Boolean,
@@ -51,18 +51,18 @@ const OpportunitiesSchema = new Schema ({
 		default: 0
 	},
 	type: {
-		type: String,
-		enum: [
-			'new',
-			'renewal',
-			'upgrade',
-			'downgrade',
-			'increase',
-			'decrease',
-			'service',
-			'free'
-		],
-		default: 'new'
+		type: Number,
+		// enum: [
+		// 	'Venta nueva',
+		// 	'Renovación',
+		// 	'Upgrade',
+		// 	'Downgrade',
+		// 	'Incremento',
+		// 	'Decremento',
+		// 	'Servicio',
+		// 	'Venta libre'
+		// ],
+		default: 0
 	},
 	probability: {
 		type: Number,
@@ -130,8 +130,23 @@ OpportunitiesSchema.pre('save', function(next) {
 	next();
 });
 
+OpportunitiesSchema.methods.changeStatus = function(status){
+	if(!status) {
+		this.status = 0;
+	} else {
+		this.status = status;
+	}
+};
+
+OpportunitiesSchema.static('enumType' , function(language, field){
+	const Enum = require('../src/enums');
+	return Enum.find({language, field,schemaName: 'opportunities'}).sort({value: 1});
+});
+
+
 OpportunitiesSchema.index({ name		: 1 } );
 OpportunitiesSchema.index({ quote 	: 1 } );
+OpportunitiesSchema.index({ type 		: 1 } );
 OpportunitiesSchema.index({ status	: 1 } );
 OpportunitiesSchema.index({ closed	: 1 }, { sparse: true } );
 

@@ -41,6 +41,10 @@ module.exports = {
 			.equals('application/json'),
 		body('oppid', 'ID de la oportunidad es obligatorio').exists()
 	],
+	getEnums: [
+		param('language', 'Language es requerido').exists(),
+		param('field', 'Field es un campo requerido').exists()
+	],
 	results(req,res,next) {
 		//console.log(req.headers);
 		const errors = validationResult(req);

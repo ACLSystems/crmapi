@@ -38,6 +38,16 @@ module.exports = (app) => {
 	app.get ('/api/v1/sales/opportunities',
 		OpportunityController.list);
 
+	/** @api {get} /
+		* @apiName list
+		* @apiPermission sales
+		* @apiGroup opportunities
+		*/
+	app.get ('/api/v1/sales/opportunities/:language/:field',
+		Validate.getEnums,
+		Validate.results,
+		OpportunityController.enumField);
+
 	/** @api {patch} /
 		* @apiName modifyCurrency
 		* @apiPermission admin

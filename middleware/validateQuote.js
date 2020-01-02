@@ -1,7 +1,7 @@
 const {
 	body,
 	header,
-	// param,
+	param,
 	query,
 	validationResult
 } 	= require('express-validator');
@@ -22,6 +22,9 @@ module.exports = {
 	],
 	list: [
 		query('owner','El dueño debe ser un ObjectId válido').isMongoId().optional()
+	],
+	get: [
+		param('quoteid','Ingresa el id de la cotización').exists()
 	],
 	results(req,res,next) {
 		//console.log(req.headers);
