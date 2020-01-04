@@ -3,7 +3,7 @@ const mongoose 					= require('mongoose'			);
 const moment 						= require('moment'				);
 const bcrypt 						= require('bcryptjs'			);
 const ModSchema 				= require('./modified'		);
-const Happy 						= require('./happiness'		);
+// const Happy 						= require('./happiness'		);
 const Address						= require('./address'			);
 const Social 						= require('./social'			);
 
@@ -268,7 +268,7 @@ const UserSchema = new Schema ({
 		type: String
 	}],
 	social: Social,
-	happiness: Happy,
+	happiness: Number,
 	address: [Address],
 	mod: [ModSchema],
 	// perm: PermissionsSchema,

@@ -1,11 +1,13 @@
 //const Validator 				= require('express-route-validator');
 //const StatusCodes 			= require('http-status-codes');
-const Validate					= require('../middleware/validatePublic');
+const Validate					= require('../middleware/validatePublic'			);
+const ValidateAdmin 		= require('../middleware/validateAdmin'				);
 const AuthMiddleware 		= require('../middleware/auth'								);
 // const ChangeParams			= require('../middleware/changeParams'				);
 const GetNothing 				= require('../controllers/get_nothing'				);
 const UserController		= require('../controllers/usersController'		);
 const OrgController			= require('../controllers/orgsController'			);
+const AdminController 	= require('../controllers/admin_controller'		);
 
 module.exports = (app) => {
 
@@ -56,67 +58,23 @@ module.exports = (app) => {
 		OrgController.checkOrgExistence
 	);
 
+	/** @api {get} /languages
+		* @apiName languages
+		* @apiPermission none
+		* @apiGroup admin
+		* @apiSuccess (200) {Object}
+		*/
+	app.get('/languages',
+		AdminController.getLanguagesPublic
+	);
 
-
-	// /** @api {get} /api/user/:name
-	// 	* @apiName Detalles del usuario
-	// 	* @apiPermission none
-	// 	* @apiGroup User
-	// 	* @apiParam {String} [name] Nombre de usuario
-	// 	* @apiSuccess (200) {Object}
-	// 	*/
-	// app.get ('/api/user/:name',
-	// 	Validate.getDetailsPublic,
-	// 	Validate.results,
-	// 	UserController.getDetailsPublic);
-	//
-	// /** @api {post} /api/user/confirm
-	// 	* @apiName Confirmar cuenta del usuario
-	// 	* @apiPermission none
-	// 	* @apiGroup User
-	// 	* @apiParam {String} [email] email de usuario
-	// 	* @apiParam {String} [token] token temporal
-	// 	* @apiParam {String} [name] Nombre de usuario
-	// 	* @apiParam {String} [fatherName] Apellido paterno
-	// 	* @apiParam {String} [motherName] Apellido materno
-	// 	* @apiSuccess (200) {Object}
-	// 	*/
-	// app.post('/api/user/confirm',
-	// 	ChangeParams.confirm,
-	// 	Validate.confirm,
-	// 	Validate.results,
-	// 	UserController.confirm);
-	//
-	// /** @api {post} /api/user/validateemail
-	// 	* @apiName Validar cuenta de correo del usuario
-	// 	* @apiPermission none
-	// 	* @apiGroup User
-	// 	* @apiParam {String} [email] email de usuario
-	// 	* @apiSuccess (200) {Object}
-	// 	*/
-	// app.post('/api/user/validateemail',
-	// 	Validate.validateEmail,
-	// 	Validate.results,
-	// 	UserController.validateEmail);
-	//
-	// /** @api {post} /api/user/passwordrecovery
-	// 	* @apiName Validar cuenta de correo para recuperar password del usuario
-	// 	* @apiPermission none
-	// 	* @apiGroup User
-	// 	* @apiParam {String} [email] email de usuario
-	// 	* @apiParam {String} [emailID] token temporal
-	// 	* @apiParam {String} [password] password de usuario
-	// 	* @apiSuccess (200) {Object}
-	// 	*/
-	// app.post('/api/user/passwordrecovery',
-	// 	Validate.passwordRecovery,
-	// 	Validate.results,
-	// 	UserController.passwordRecovery);
-	//
-	// /** @api {get} /api/help
-	// 	* @apiName Ayuda y documentación (desaparecerá)
-	// 	* @apiPermission none
-	// 	* @apiGroup Public
-	// 	* @apiSuccess (200) {Object}
-	// 	*/
+	/** @api {get} /
+		* @apiName get
+		* @apiPermission admin
+		* @apiGroup enum
+		*/
+	app.get('/enums',
+		ValidateAdmin.getEnums,
+		ValidateAdmin.results,
+		AdminController.getEnum);
 };

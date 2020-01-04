@@ -45,7 +45,8 @@ module.exports = {
 			}
 			await user.save();
 			res.status(StatusCodes.OK).json({
-				'message': `${user.name} creado correctamente`
+				'message': `${user.name} creado correctamente`,
+				'id': user._id
 			});
 		} catch (e) {
 			Err.sendError(res,e,'usersController', 'create -- Creating User--');

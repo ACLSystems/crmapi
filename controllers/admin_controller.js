@@ -145,6 +145,19 @@ module.exports = {
 		}
 	}, //getLanguage
 
+	async getLanguagesPublic(req,res) {
+		var query = Object.assign({}, req.query);
+		try {
+			var languages = await Language.find(query)
+				.select('default code name');
+			if(languages && Array.isArray(languages)) {
+				res.status(StatusCodes.OK).json(languages);
+			}
+		} catch (e) {
+			Err.sendError(res,e,'adminController', 'list -- list Enum--');
+		}
+	}, //getLanguage
+
 	async modifyLanguage(req,res) {
 		const key_user = res.locals.user;
 		var updates = Object.keys(req.body);
